@@ -1,0 +1,40 @@
+@page
+@model CreateModel
+@{
+    ViewData["Title"] = "Добавить сбор урожая";
+}
+<h1>Новый сбор урожая</h1>
+<form method="post">
+    <div>
+        <label asp-for="Input.DateHarvest"></label>
+        <input asp-for="Input.DateHarvest" type="date" class="form-control" />
+        <span asp-validation-for="Input.DateHarvest" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label asp-for="Input.Quantity"></label>
+        <input asp-for="Input.Quantity" type="number" class="form-control" />
+        <span asp-validation-for="Input.Quantity" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Input.UnitId"></label>
+        <select asp-for="Input.UnitId" asp-items="Model.UnitSelectList" class="form-control">
+            <option value="">Выберите единицу измерения</option>
+        </select>
+        <span asp-validation-for="Input.UnitId" class="text-danger"></span>
+    </div>
+    
+    <div>
+        <label asp-for="Input.ProductId"></label>
+        <select asp-for="Input.ProductId" asp-items="Model.ProductSelectList" class="form-control"></select>
+        <span asp-validation-for="Input.ProductId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Сохранить</button>
+    <button type="button" onclick="history.back()">Назад</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

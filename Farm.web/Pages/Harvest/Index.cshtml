@@ -1,0 +1,90 @@
+@page "/Harvest/Index"
+@model IndexModelH
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Сбор урожая";
+}
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <p>Здравствуйте, @User.Identity.Name</p>
+    <a asp-page="/Profile/Profile" class="btn btn-success">Профиль</a>
+}
+else
+{
+    <p>Вы не вошли в систему.</p>
+    <a asp-page="/Account/Login" class="btn btn-success">Войти</a>
+}
+
+<h1>Сбор продукции</h1>
+
+<form method="get" class="mb-3">
+    <div class="row mb-2">
+        <div class="col-md-3">
+            <label asp-for="Filter.FromDate">От даты:</label>
+            <input asp-for="Filter.FromDate" type="date" class="form-control" />
+        </div>
+        <div class="col-md-3">
+            <label asp-for="Filter.ToDate">До даты:</label>
+            <input asp-for="Filter.ToDate" type="date" class="form-control" />
+        </div>
+        <div class="col-md-3">
+            <label asp-for="Filter.ProductId">Продукт:</label>
+            <select asp-for="Filter.ProductId" asp-items="Model.Filter.Products" class="form-control">
+                <option value="">Все</option>
+            </select>
+        </div>
+        <div class="col-md-3 align-self-end">
+            <button type="submit" class="btn btn-primary">Фильтровать</button>
+            <a asp-page="/Harvest/Index" class="btn btn-secondary">Сбросить</a>
+        </div>
+    </div>
+</form>
+    <p><a asp-page="/UoM/Create" class="btn btn-success">Добавить единицы измерения</a></p>
+    <p><a asp-page="/Products/Create" class="btn btn-success">Добавить новый продукт</a></p>
+<p><a asp-page="Create" class="btn btn-success">Добавить новый сбор</a></p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Пользователь</th>
+            <th>Дата сбора</th>
+            <th>Количество</th>
+            <th>Единица</th>
+            <th>Продукт</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Filter.Results.Any())
+        {
+            foreach (var item in Model.Filter.Results)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.UserName</td>
+                    <td>@item.DateHarvest.ToShortDateString()</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.UnitName</td>
+                    <td>@item.ProductName</td>
+                    <td>
+                        <a asp-page="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Редактировать</a>
+                        <form method="post" asp-page-handler="Delete" asp-route-id="@item.Id"
+                              onsubmit="return confirm('Удалить сбор?')" style="display:inline">
+                            <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center">Нет данных для отображения</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<button type="button" onclick="history.back()" class="btn btn-outline-secondary">Назад</button>

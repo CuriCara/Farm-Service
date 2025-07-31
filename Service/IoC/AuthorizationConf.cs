@@ -16,6 +16,7 @@ public class AuthorizationConf
     public static void ConfigureServices(IServiceCollection services, FarmSettings settings)
     {
         IdentityModelEventSource.ShowPII = true;
+
         services.AddIdentity<User, Role>(options =>
             {
                 options.Password.RequireDigit = true;
@@ -24,10 +25,11 @@ public class AuthorizationConf
             .AddEntityFrameworkStores<FarmDbContext>()
             .AddSignInManager()
             .AddDefaultTokenProviders();
-        
+
         services.AddIdentityServer()
-            .AddInMemoryApiScopes([new ApiScope("api")])
-            .AddInMemoryClients([
+            .AddInMemoryApiScopes(new[] { new ApiScope("api") })
+            .AddInMemoryClients(new[]
+            {
                 new Client
                 {
                     ClientId = settings.ClientId!,
@@ -35,44 +37,51 @@ public class AuthorizationConf
                     Enabled = true,
                     AllowOfflineAccess = true,
                     AllowedGrantTypes =
-                    [
+                    {
                         GrantType.ClientCredentials,
                         GrantType.ResourceOwnerPassword,
-                    ],
+                    },
                     ClientSecrets =
-                    [
+                    {
                         new Secret(settings.ClientSecret!.Sha256())
-                    ],
-                    AllowedScopes = ["api"]
+                    },
+                    AllowedScopes = { "api" }
                 }
-            ])
+            })
             .AddAspNetIdentity<User>();
+        
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll", builder =>
+            {
+                builder
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
+
+        services.ConfigureApplicationCookie(options =>
+        {
+            options.LoginPath = "/Account/Login";
+        });
         
         services.AddAuthentication(options =>
         {
-            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-        {
-            options.RequireHttpsMetadata = false;
-            options.Authority = settings.IdentityServerUri;
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = false,
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                RequireSignedTokens = true,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
-            };
-            options.Audience = "api";
+            options.DefaultScheme = IdentityConstants.ApplicationScheme;
+            options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+            options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
         });
+        
         services.AddAuthorization();
     }
+
     public static void ConfigureApplication(IApplicationBuilder app)
     {
+        app.UseCors("AllowAll");
+
         app.UseIdentityServer();
+
         app.UseAuthentication();
         app.UseAuthorization();
     }

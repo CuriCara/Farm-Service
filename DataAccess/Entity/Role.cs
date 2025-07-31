@@ -1,13 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace DataAccess.Entity;
-
-[Table("Role")]
-public class Role
+public class Role : IdentityRole<int>
 {
-    public int Id { get; set; }
     
-    public string RoleValue { get; set; }
-    
-    public List<User> Users { get; set; }
 }

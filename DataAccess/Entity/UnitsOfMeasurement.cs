@@ -1,13 +1,26 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace DataAccess.Entity;
 
 [Table("UnitsOfMeasurement")]
-public class UnitsOfMeasurement
+public class UnitsOfMeasurement : BaseEntity
 {
     public int Id { get; set; }
+
+    [Required(ErrorMessage = "Введите единицу измерения")]
+    public string UoM { get; set; } 
+
+    [Required(ErrorMessage = "Укажите коэффициент перевода к базовой единице")]
+    [Range(0.0001, double.MaxValue)]
+    public double ConversionFactor { get; set; }
     
-    public string UoM { get; set; }
+    [Required(ErrorMessage = "Выберите категорию")]
+    public int? UnitCategoryId { get; set; }
     
-    public List<Product> Products { get; set; }
+    [ForeignKey(nameof(UnitCategoryId))]
+    public UnitCategory? Category { get; set; }
+    
 }

@@ -7,7 +7,11 @@ public class Harvest : BaseEntity
 {
     public DateTime DateHarvest { get; set; }
     
-    public int Quantity { get; set; }
+    public double Quantity { get; set; }
+    public int UnitId { get; set; }
+
+    [ForeignKey(nameof(UnitId))]
+    public UnitsOfMeasurement Unit { get; set; }
     
     public int UserId { get; set; }
     

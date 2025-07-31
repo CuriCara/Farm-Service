@@ -11,7 +11,7 @@ public class UsersBLProfile : Profile
         CreateMap<User, UserModel>()
             .ForMember(x => x.Id, opt => opt.MapFrom(scr => scr.Id))
             .ForMember(x => x.UserName, opt => opt.MapFrom(scr => scr.UserName))
-            .ForMember(x => x.RoleId, opt => opt.MapFrom(scr => scr.RoleId))
+            //.ForMember(x => x.RoleId, opt => opt.MapFrom(scr => scr.RoleId))
             .ForMember(x => x.Email, opt => opt.MapFrom(scr => scr.Email))
             .ForMember(x => x.PasswordHash, opt => opt.MapFrom(scr => scr.PasswordHash));
 

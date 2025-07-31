@@ -1,0 +1,26 @@
+@page
+@model ProfileModel
+@{
+    ViewData["Title"] = "Профиль";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success" role="alert">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<h1>Профиль</h1>
+
+<p><strong>Имя пользователя:</strong> @Model.UserName</p>
+<p><strong>Email:</strong> @Model.Email</p>
+<p><strong>Роль:</strong> @Model.Role</p>
+
+@if (!string.IsNullOrEmpty(Model.Description))
+{
+    <p><strong>О себе:</strong> @Model.Description</p>
+}
+
+<p><a asp-page="Edit" class="btn btn-success">Редактировать</a></p>
+<button type="button" onclick="history.back()" class="btn btn-outline-secondary">Назад</button>

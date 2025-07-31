@@ -1,0 +1,9 @@
+@page "/Account/AccessDenied"
+@model Farm.web.Pages.AccessDenied
+@{
+    ViewData["Title"] = "Доступ запрещён";
+}
+
+<h1 class="text-danger">Нет прав доступа</h1>
+<p>У вас нет необходимых прав для выполнения этого действия.</p>
+<a asp-page="/Index" class="btn btn-primary">На главную</a>

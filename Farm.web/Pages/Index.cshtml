@@ -1,0 +1,13 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Главная";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Добро пожаловать в Farm Management!</h1>
+    <p>Управляйте пользователями, урожаями и отчетами.</p>
+    <a asp-page="/Harvest/Index" class="btn btn-success">Сбор продукции</a>
+    <a asp-page="/Account/Register" class="btn btn-success">Создать пользователя</a>
+    <a asp-page="/Account/Login" class="btn btn-success">Войти в аккаунт</a>
+</div>

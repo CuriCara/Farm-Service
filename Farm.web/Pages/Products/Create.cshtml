@@ -1,0 +1,30 @@
+@page "/Products/Create"
+@model CreateProductModel
+@{
+ViewData["Title"] = "Добавление продукта";
+}
+
+<h1>Добавление продукта</h1>
+
+<form method="post">
+    <div class="form-group">
+        <label asp-for="ProductName">Название продукта</label>
+        <input asp-for="ProductName" class="form-control" />
+        <span asp-validation-for="ProductName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="SelectedCategoryId">Категория единиц измерения</label>
+        <select asp-for="SelectedCategoryId" asp-items="Model.UnitCategoryOptions" class="form-control">
+            <option value="">-- Выберите категорию --</option>
+        </select>
+        <span asp-validation-for="SelectedCategoryId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Добавить</button>
+    <button type="button" onclick="history.back()">Назад</button>
+</form>
+
+@section Scripts {
+<partial name="_ValidationScriptsPartial" />
+}

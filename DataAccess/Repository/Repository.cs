@@ -6,9 +6,9 @@ namespace DataAccess.Repository;
 
 public class Repository<T> : IRepository<T> where T : class, IBaseEntity
 {
-    private DbContext _context;
+    private FarmDbContext _context;
 
-    public Repository(DbContext context)
+    public Repository(FarmDbContext context)
     {
         _context = context;
     }
@@ -17,6 +17,12 @@ public class Repository<T> : IRepository<T> where T : class, IBaseEntity
     {
         return _context.Set<T>();
     }
+    
+    public IQueryable<T> GetAllAsync()
+    {
+        return _context.Set<T>();
+    }
+
     
     public IQueryable<T> GetAll(Expression<Func<T, bool>> predicate)
     {
@@ -56,3 +62,51 @@ public class Repository<T> : IRepository<T> where T : class, IBaseEntity
         _context.SaveChanges();
     }
 }
+
+
+
+// using Microsoft.EntityFrameworkCore;
+// using BusinessLogic.Harvests.Provider;
+// using DataAccess;
+// using DataAccess.Entity;
+//
+// namespace DataAccess.Repository
+// {
+//     public class Repository<T> : IRepository<T> where T : class,IBaseEntity
+//     {
+//         private readonly FarmDbContext _context;
+//
+//         public Repository(FarmDbContext context)
+//         {
+//             _context = context ?? throw new ArgumentNullException(nameof(context));
+//         }
+//
+//         public async Task<List<T>> GetAllAsync()
+//         {
+//             return await _context.Set<T>().ToListAsync();
+//         }
+//
+//         public async Task<T> GetByIdAsync(int id)
+//         {
+//             return await _context.Set<T>().FindAsync(id);
+//         }
+//
+//         public async Task AddAsync(T entity)
+//         {
+//             await _context.Set<T>().AddAsync(entity);
+//             await _context.SaveChangesAsync();
+//         }
+//
+//         public async Task UpdateAsync(T entity)
+//         {
+//             _context.Set<T>().Update(entity);
+//             await _context.SaveChangesAsync();
+//         }
+//
+//         public async Task DeleteAsync(T entity)
+//         {
+//             _context.Set<T>().Remove(entity);
+//             await _context.SaveChangesAsync();
+//         }
+//     }
+// }

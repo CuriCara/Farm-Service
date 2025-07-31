@@ -3,6 +3,7 @@ namespace BusinessLogic.Users.Model;
 public class UserModel
 {
     public int Id { get; set; }
+    public Guid ExternalId { get; set; }
     
     public string UserName { get; set; }
     

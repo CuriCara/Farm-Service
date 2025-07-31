@@ -19,7 +19,7 @@ public class UserProvider : IUserProvider
 
     public IEnumerable<UserModel> GetUsers(UserFilterModel filter = null)
     {
-        string? namePart = filter?.NamePart;
+        string? namePart = filter?.userNamePart;
         string? emailPart = filter?.EmailPart;
         DateTime? creationTime = filter?.CreationTime;
         DateTime? modificationTime = filter?.ModificationTime;
@@ -29,8 +29,8 @@ public class UserProvider : IUserProvider
             (namePart == null || u.UserName.Contains(namePart)) &&
             (emailPart == null || u.Email.Contains(emailPart)) &&
             (creationTime == null || u.CreationTime == creationTime) &&
-            (modificationTime == null || u.ModificationTime == modificationTime) &&
-            (role == null || u.RoleId == role)
+            (modificationTime == null || u.ModificationTime == modificationTime) /*&&
+            (role == null || u.RoleId == role)*/
             );
         
         return _mapper.Map<IEnumerable<UserModel>>(users);

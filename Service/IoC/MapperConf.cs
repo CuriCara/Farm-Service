@@ -1,9 +1,7 @@
 using BusinessLogic.Mapper;
 using Service.Mapper;
 
-namespace Service.IoC;
-
-public class MapperConf
+public static class MapperConf
 {
     public static void ConfigureServices(WebApplicationBuilder builder)
     {
@@ -12,6 +10,7 @@ public class MapperConf
         {
             config.AddProfile<UsersBLProfile>();
             config.AddProfile<UsersServiceProfile>();
+            config.AddProfile<HarvestProfile>();
         });
     }
 }

@@ -2,10 +2,10 @@ namespace DataAccess.Entity;
 
 public interface IBaseEntity
 {
-    public int Id { get; set; } //ключ в бд
+    public int Id { get; set; }
 
-    public Guid ExternalId { get; set; } // unique index - unique optional
-    public DateTime ModificationTime { get; set; } // optional
-    public DateTime CreationTime { get; set; } //optional
+    public Guid ExternalId { get; set; }
+    public DateTime ModificationTime { get; set; }
+    public DateTime CreationTime { get; set; }
     
 }

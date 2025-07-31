@@ -6,12 +6,12 @@ namespace Service.Controllers;
 public class AuthController(IAuthProvider _authProvider) : ControllerBase
 {
     [HttpGet]
-    [Route("logic")]
-    public async Task<IActionResult> LoginUser([FromQuery] string email, [FromQuery] string password)
+    [Route("login")]
+    public async Task<IActionResult> LoginUser([FromQuery] string email, [FromQuery] string password, [FromQuery] string userName)
     {
         try
         {
-            var authUser = await _authProvider.AuthorizeUser(email, password);
+            var authUser = await _authProvider.AuthorizeUser(email, password, userName);
             return Ok(authUser);
         }
         catch (Exception ex)
@@ -22,11 +22,11 @@ public class AuthController(IAuthProvider _authProvider) : ControllerBase
     
     [HttpPost]
     [Route("register")]
-    public async Task<IActionResult> RegisterUser(string email, string password)
+    public async Task<IActionResult> RegisterUser(string email, string password, string userName)
     {
         try
         {
-            var newUser = await _authProvider.RegisterUser(email, password);
+            var newUser = await _authProvider.RegisterUser(email, password, userName);
             return Ok(newUser);
         }
         catch (Exception ex)

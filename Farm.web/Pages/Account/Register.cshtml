@@ -1,0 +1,46 @@
+@page
+@model RegisterModel
+@{
+ViewData["Title"] = "Регистрация";
+}
+
+
+<h1>Регистрация</h1>
+
+<partial name="_ValidationScriptsPartial" />
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form method="post">
+    <div>
+        <label asp-for="Input.Email"></label>
+        <input asp-for="Input.Email" type="email" />
+        <span asp-validation-for="Input.Email" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label asp-for="Input.UserName"></label>
+        <input asp-for="Input.UserName" />
+        <span asp-validation-for="Input.UserName" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label asp-for="Input.Password"></label>
+        <input asp-for="Input.Password" type="password" />
+        <span asp-validation-for="Input.Password" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label asp-for="Input.PasswordDouble"></label>
+        <input asp-for="Input.PasswordDouble" type="password" />
+        <span asp-validation-for="Input.PasswordDouble" class="text-danger"></span>
+    </div>
+
+    <button type="submit">Зарегистрироваться</button>
+    <a asp-page="/Account/Login" class="btn btn-secondary">Войти</a>
+    <button type="button" onclick="history.back()">Назад</button>
+
+</form>
+
+@section Scripts {
+<partial name="_ValidationScriptsPartial" />
+}

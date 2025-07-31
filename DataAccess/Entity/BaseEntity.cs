@@ -1,8 +1,10 @@
-﻿namespace DataAccess.Entity;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace DataAccess.Entity;
 
 public abstract class BaseEntity : IBaseEntity
 {
-    public int Id { get; set; }
+    [Key] public int Id { get; set; }
     
     public Guid ExternalId { get; set; }
     

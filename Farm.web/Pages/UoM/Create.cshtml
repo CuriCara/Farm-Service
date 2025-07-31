@@ -1,0 +1,38 @@
+@page
+@model CreateUoMModel
+@{
+    ViewData["Title"] = "Добавление единицы измерения";
+}
+
+<h1>Добавить единицу измерения</h1>
+
+<form method="post">
+    <div class="form-group">
+        <label asp-for="UoM.UoM">Название единицы (например, грамм)</label>
+        <input asp-for="UoM.UoM" class="form-control" />
+        <span asp-validation-for="UoM.UoM" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="UoM.UnitCategoryId">Категория</label>
+        <select asp-for="UoM.UnitCategoryId" asp-items="Model.UnitCategoryOptions" class="form-control">
+            <option value="">-- Выберите категорию --</option>
+        </select>
+        <span asp-validation-for="UoM.UnitCategoryId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="UoM.ConversionFactor">Коэффициент преобразования к базовой единице</label>
+        <input asp-for="UoM.ConversionFactor" type="number" step="any" class="form-control" />
+        <span asp-validation-for="UoM.ConversionFactor" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Добавить</button>
+    <a asp-page="/Index" class="btn btn-secondary">Отмена</a>
+</form>
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<button type="button" onclick="history.back()" class="btn btn-outline-secondary">Назад</button>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

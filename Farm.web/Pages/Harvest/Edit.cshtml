@@ -1,0 +1,33 @@
+@page
+@model EditModel
+@{
+ViewData["Title"] = "Редактировать сбор урожая";
+}
+<h1>Редактирование сбора урожая</h1>
+
+<form method="post">
+    <input type="hidden" asp-for="Input.Id" />
+
+    <div>
+        <label asp-for="Input.DateHarvest"></label>
+        <input asp-for="Input.DateHarvest" type="date" />
+    </div>
+
+    <div>
+        <label asp-for="Input.ProductId">Продукт</label>
+        <select asp-for="Input.ProductId" asp-items="Model.Products"></select>
+    </div>
+
+    <div>
+        <label asp-for="Input.Quantity">Количество</label>
+        <input asp-for="Input.Quantity" />
+    </div>
+
+    <div>
+        <label asp-for="Input.UnitId">Единица измерения</label>
+        <select asp-for="Input.UnitId" asp-items="Model.Units"></select>
+    </div>
+
+    <button type="submit">Сохранить</button>
+    <button type="button" onclick="history.back()">Назад</button>
+</form>

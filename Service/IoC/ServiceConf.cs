@@ -17,7 +17,7 @@ public class ServiceConf
     {
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IRepository<User>>(x => 
-            new Repository<User>(x.GetRequiredService<DbContext>()));
+            new Repository<User>(x.GetRequiredService<FarmDbContext>()));
         services.AddScoped<IUserProvider>(x => 
             new UserProvider(x.GetRequiredService<IRepository<User>>(), 
                 x.GetRequiredService<IMapper>()));

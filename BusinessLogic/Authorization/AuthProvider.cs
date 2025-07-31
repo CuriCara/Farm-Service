@@ -18,7 +18,7 @@ public class AuthProvider (
     string clientSecret,
     IMapper mapper) : IAuthProvider
 {
-    public async Task<TokensResponse> AuthorizeUser(string email, string password)
+    public async Task<TokensResponse> AuthorizeUser(string email, string password, string userName)
     {
         var userByEmail = await _userManager.FindByEmailAsync(email);
         if (userByEmail is null)
@@ -45,7 +45,7 @@ public class AuthProvider (
             GrantType = GrantType.ResourceOwnerPassword,
             ClientId = clientId,
             ClientSecret = clientSecret,
-            UserName = userByEmail.UserName,
+            UserName = userName,
             Password = password,
             Scope = "api offline_access"
         });
@@ -60,25 +60,46 @@ public class AuthProvider (
         };
     }
 
-    public async Task<UserModel> RegisterUser(string email, string password)
+    public async Task<UserModel> RegisterUser(string email, string password, string userName)
     {
+        if (string.IsNullOrWhiteSpace(userName))
+        {
+            throw new AuthExceptions("Имя пользователя не может быть пустым или содержать только пробелы.");
+        }
+
+        var trimmedUserName = userName.Trim();
+
+        if (!trimmedUserName.All(char.IsLetterOrDigit))
+        {
+            throw new AuthExceptions("Имя пользователя может содержать только буквы и цифры.");
+        }
+        
         var userByEmail = await _userManager.FindByEmailAsync(email);
         if (userByEmail is not null)
         {
             throw new AuthExceptions(Excep.UserAlreadyExists);
         }
         
+
         var user = new User
         {
-            Email = email
+            UserName = userName,
+            Email = email,
+            CreationTime = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc),
+            ModificationTime = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc),
+            ExternalId = Guid.NewGuid()
         };
         
-        var userCreate = await _userManager.CreateAsync(user, password);
-        if (!userCreate.Succeeded)
+        try
         {
-            throw new AuthExceptions(Excep.UserCreationError);
+            var userCreate = await _userManager.CreateAsync(user, password);
         }
-        
+        catch (Exception ex)
+        {
+            var inner = ex.InnerException?.Message ?? ex.Message;
+            throw new Exception($"Ошибка сохранения: {inner}", ex);
+        }
+
         var newUser = await _userManager.FindByEmailAsync(email);
         return mapper.Map<UserModel>(newUser);
     }
