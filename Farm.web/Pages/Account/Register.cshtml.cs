@@ -24,18 +24,22 @@ public class RegisterModel : PageModel
     {
         [Required]
         [EmailAddress(ErrorMessage = "Введите корректный email")]
+        [Display(Name = "Email")]
         public string Email { get; set; }
 
         [Required]
+        [Display(Name = "Логин")]
         public string UserName { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
+        [Display(Name = "Пароль")]
         public string Password { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "Пароли не совпадают")]
+        [Display(Name = "Повторите пароль")]
         public string PasswordDouble { get; set; }
     }
 

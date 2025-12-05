@@ -6,8 +6,6 @@ namespace DataAccess.Entity;
 [Table("UnitCategory")]
 public class UnitCategory : BaseEntity
 {
-    public int Id { get; set; }
-
     [Required]
     public string Name { get; set; }
 

@@ -22,11 +22,13 @@ public class LoginModel : PageModel
     {
         [Required]
         [EmailAddress(ErrorMessage = "Введите корректный email")]
+        [Display(Name = "Email")]
         public string Email { get; set; }
 
 
         [Required]
         [DataType(DataType.Password)]
+        [Display(Name = "Пароль")]
         public string Password { get; set; }
     }
 

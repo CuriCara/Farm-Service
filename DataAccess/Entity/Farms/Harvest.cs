@@ -24,4 +24,9 @@ public class Harvest : BaseEntity
     public Product Product { get; set; }
     
     public List<Report> Reports { get; set; }
+    
+    public int FarmId { get; set; }
+    
+    [ForeignKey(nameof (FarmId))]
+    public Farm Farm { get; set; }
 }

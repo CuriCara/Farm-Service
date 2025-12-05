@@ -15,6 +15,7 @@ public class ServiceConf
 {
     public static void ConfigureServices(IServiceCollection services, FarmSettings settings)
     {
+        
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IRepository<User>>(x => 
             new Repository<User>(x.GetRequiredService<FarmDbContext>()));

@@ -7,15 +7,19 @@ ViewData["Title"] = "Вход";
 <form method="post">
     <div>
         <label asp-for="Input.Email"></label>
-        <input asp-for="Input.Email" />
+        <input asp-for="Input.Email" class="form-control" />
         <span asp-validation-for="Input.Email" class="text-danger"></span>
     </div>
     <div>
         <label asp-for="Input.Password"></label>
-        <input asp-for="Input.Password" type="password" />
+        <input asp-for="Input.Password" class="form-control" type="password" />
         <span asp-validation-for="Input.Password" class="text-danger"></span>
     </div>
-    <button type="submit">Войти</button>
-    <a asp-page="/Account/Register" class="btn btn-secondary">Зарегистрироваться</a>
-    <button type="button" onclick="history.back()">Назад</button>
+    <button type="submit" class="btn btn-success">Войти</button>
+    <a asp-page="/Account/Register" class="btn btn-primary">Зарегистрироваться</a>
+    <button type="button" class="btn btn-secondary" onclick="history.back()">Назад</button>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

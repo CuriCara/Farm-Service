@@ -11,6 +11,7 @@ using DinkToPdf.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Service;
+using Service.GA.DistanceMatrix;
 using Service.IoC;
 using Service.Settings;
 
@@ -23,21 +24,6 @@ var settings = FarmSettingsReader.Read(configuration);
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorPages();
-builder.Services.AddScoped<ProductManager>();
-builder.Services.AddScoped<UnitsOfMeasurementProvider>();
-builder.Services.AddScoped<UnitCategoryProvider>();
-//builder.Services.AddScoped<IAuthProvider, AuthProvider>();
-builder.Services.AddScoped<HarvestManager>();
-builder.Services.AddScoped<ProductProvider>();
-builder.Services.AddScoped<UserProvider>();
-builder.Services.AddScoped<EmailService>();
-builder.Services.AddScoped<ReportService>();
-builder.Services.AddScoped<IRepository<Harvest>, HarvestProvider>();
-builder.Services.AddScoped<IRepository<User>, UserProvider>();
-builder.Services.AddScoped<IRepository<Product>, ProductProvider>();
-builder.Services.AddScoped<IRepository<UnitsOfMeasurement>, UnitsOfMeasurementProvider>();
-
 builder.Services.AddAutoMapper(typeof(HarvestProfile));
 builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 builder.Services.AddControllers();
@@ -48,6 +34,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
+builder.Services.AddHttpClient<IDistanceMatrixProvider, GraphHopperDistanceMatrixProvider>();
+builder.Services.Configure<GraphHopperSettings>(
+    builder.Configuration.GetSection("GraphHopper"));
 
 AuthorizationConf.ConfigureServices(builder.Services, settings);
 DbContextConf.ConfigureService(builder);
@@ -55,6 +44,7 @@ SerilogConf.ConfigureService(builder);
 SwaggerConf.ConfigureServices(builder.Services);
 MapperConf.ConfigureServices(builder);
 ServiceConf.ConfigureServices(builder.Services, settings);
+ProviderConf.ConfigureServices(builder);
 
 var app = builder.Build();
 

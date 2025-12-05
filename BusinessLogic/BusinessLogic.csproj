@@ -11,6 +11,7 @@
       <PackageReference Include="DinkToPdf" Version="1.0.8" />
       <PackageReference Include="Duende.IdentityServer" Version="7.1.0-rc.1" />
       <PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="7.1.0-rc.1" />
+      <PackageReference Include="graphhopper" Version="1.2.0" />
       <PackageReference Include="SendGrid" Version="9.29.3" />
     </ItemGroup>
 
@@ -23,6 +24,11 @@
 
     <ItemGroup>
         <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <Folder Include="Distance\" />
     </ItemGroup>
     
 </Project>

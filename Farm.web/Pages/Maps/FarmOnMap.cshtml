@@ -1,0 +1,75 @@
+@page
+@model FarmsMapModel
+@{
+ViewData["Title"] = "Карта участков";
+}
+
+<h2>Карта участков</h2>
+
+<div id="map" style="height: 500px; width: 100%;"></div>
+
+@section Scripts {
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
+    .colored-marker {
+        background-size: contain;
+        width: 25px;
+        height: 41px;
+        display: inline-block;
+    }
+    
+    .marker-base {
+        background-image: url('https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png');
+    }
+    
+    .farm-marker { filter: hue-rotate(-50deg); }
+    .store-marker { filter: hue-rotate(20deg); }
+</style>
+
+<script>
+    var map = L.map('map').setView([51.6718, 39.2238], 11);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Иконка фермы
+    var farmIcon = L.divIcon({
+        className: "colored-marker marker-base farm-marker",
+        iconSize: [25, 41],
+        iconAnchor: [12, 41]
+    });
+
+    // Иконка магазина
+    var storeIcon = L.divIcon({
+        className: "colored-marker marker-base store-marker",
+        iconSize: [25, 41],
+        iconAnchor: [12, 41]
+    });
+
+    // Фермы
+    var farms = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Farms));
+
+    farms.forEach(f => {
+        L.marker([f.Latitude, f.Longitude], { icon: farmIcon })
+            .addTo(map)
+            .bindPopup(`<b>${f.Name}</b><br>${f.Address}`);
+    });
+
+    // Магазины
+    var stores = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Stores));
+
+    stores.forEach(s => {
+        L.marker([s.Latitude, s.Longitude], { icon: storeIcon })
+            .addTo(map)
+            .bindPopup(`<b>${s.Name}</b><br>${s.Address}`);
+    });
+
+</script>
+}
+
+<div class="back">
+    <button type="button" onclick="history.back()" class="btn btn-secondary">Назад</button>
+</div>

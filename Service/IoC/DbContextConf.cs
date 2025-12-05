@@ -33,5 +33,6 @@ public class DbContextConf
         context.Database.Migrate();
         
         FarmDbInitializer.Seed(context);
+        FarmDbInitializer.CreateEntity(context);
     }   
 }

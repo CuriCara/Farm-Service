@@ -11,6 +11,7 @@ public class HarvestProfile : Profile
         CreateMap<Harvest, HarvestModel>()
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName))
             .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.ProductName))
+            .ForMember(dest => dest.FarmName, opt => opt.MapFrom(src => src.Farm.Name))
             .ForMember(dest => dest.UnitName, opt => opt.MapFrom(src => src.Unit.Category.BaseUnit.UoM));
         
         CreateMap<HarvestModel, Harvest>()

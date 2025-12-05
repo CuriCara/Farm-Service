@@ -8,13 +8,11 @@ namespace DataAccess.Entity;
 [Table("UnitsOfMeasurement")]
 public class UnitsOfMeasurement : BaseEntity
 {
-    public int Id { get; set; }
-
     [Required(ErrorMessage = "Введите единицу измерения")]
     public string UoM { get; set; } 
 
     [Required(ErrorMessage = "Укажите коэффициент перевода к базовой единице")]
-    [Range(0.0001, double.MaxValue)]
+    [Range(0.000001, double.MaxValue)]
     public double ConversionFactor { get; set; }
     
     [Required(ErrorMessage = "Выберите категорию")]

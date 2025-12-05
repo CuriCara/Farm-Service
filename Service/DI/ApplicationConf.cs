@@ -1,3 +1,4 @@
+using Service.GA.DistanceMatrix;
 using Service.IoC;
 using Service.Settings;
 

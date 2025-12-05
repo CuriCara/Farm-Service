@@ -1,0 +1,73 @@
+@page
+@model Farm.web.Pages.StorePage.StorePageModel
+
+<h2>План доставки</h2>
+
+<form method="get" class="mb-4">
+    <div class="mb-2">
+        <label class="form-label">Магазин:</label>
+        <select asp-for="Input.StoreId" asp-items="Model.StoresItems" class="form-select"></select>
+    </div>
+
+    <div class="mb-2">
+        <label class="form-label">Дата:</label>
+        <input asp-for="Input.Date" type="date" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Показать</button>
+</form>
+
+@if (Model.Input.StoreId == 0 || Model.Input.Date == default)
+{
+    <p>Выберите магазин и дату.</p>
+}
+else if (Model.Plan == null)
+{
+    <h4>План доставки не найден</h4>
+
+    <form method="post" asp-page-handler="CreatePlan">
+        <input type="hidden" asp-for="Input.StoreId" />
+        <input type="hidden" asp-for="Input.Date" />
+
+        <button type="submit" class="btn btn-success">
+            Создать план доставки
+        </button>
+    </form>
+}
+else
+{
+    <h4>План доставки найден (ID: @Model.Plan.Id)</h4>
+
+    @if (!Model.Items.Any())
+    {
+        <p>Товары ещё не добавлены.</p>
+    }
+    else
+    {
+        <table class="table table-striped mt-3">
+            <thead>
+            <tr>
+                <th>Товар</th>
+                <th>Количество</th>
+                <th>Ед. изм.</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.Product.ProductName</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.Product.Category?.BaseUnit?.UoM</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+
+    <a asp-page="/StorePage/EditItems"
+       asp-route-planId="@Model.Plan.Id"
+       class="btn btn-secondary mt-2">
+        Редактировать товары
+    </a>
+}

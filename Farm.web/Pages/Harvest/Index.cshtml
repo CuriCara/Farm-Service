@@ -34,6 +34,12 @@ else
                 <option value="">Все</option>
             </select>
         </div>
+        <div class="col-md-3">
+            <label asp-for="Filter.FarmId">Ферма:</label>
+            <select asp-for="Filter.FarmId" asp-items="Model.Filter.Farms" class="form-control">
+                <option value="">Все</option>
+            </select>
+        </div>
         <div class="col-md-3 align-self-end">
             <button type="submit" class="btn btn-primary">Фильтровать</button>
             <a asp-page="/Harvest/Index" class="btn btn-secondary">Сбросить</a>
@@ -49,6 +55,7 @@ else
         <tr>
             <th>ID</th>
             <th>Пользователь</th>
+            <th>Ферма сбора</th>
             <th>Дата сбора</th>
             <th>Количество</th>
             <th>Единица</th>
@@ -64,6 +71,7 @@ else
                 <tr>
                     <td>@item.Id</td>
                     <td>@item.UserName</td>
+                    <td>@item.FarmName</td>
                     <td>@item.DateHarvest.ToShortDateString()</td>
                     <td>@item.Quantity</td>
                     <td>@item.UnitName</td>
@@ -81,10 +89,10 @@ else
         else
         {
             <tr>
-                <td colspan="6" class="text-center">Нет данных для отображения</td>
+                <td colspan="7" class="text-center">Нет данных для отображения</td>
             </tr>
         }
     </tbody>
 </table>
 
-<button type="button" onclick="history.back()" class="btn btn-outline-secondary">Назад</button>
+<button type="button" onclick="history.back()" class="btn btn-secondary">Назад</button>

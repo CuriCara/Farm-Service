@@ -24,6 +24,7 @@ public class HarvestManager
                     .ThenInclude(c => c.BaseUnit)
             .Include(h => h.Product)
             .Include(h => h.User)
+            .Include(h => h.Farm)
             .ToListAsync();
     }
     public Task<Harvest> GetByIdAsync(int id) => _repo.GetByIdAsync(id);

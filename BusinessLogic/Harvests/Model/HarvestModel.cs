@@ -17,4 +17,6 @@ public class HarvestModel
     public int ProductId { get; set; }
 
     public string ProductName { get; set; }
+    public int FarmId { get; set; }
+    public string FarmName { get; set; }
 }

@@ -19,21 +19,24 @@ public class CreateModel : PageModel
     private readonly UserManager<User> _userManager;
     private readonly ProductProvider _productRepo;
     private readonly UnitsOfMeasurementProvider _uomRepo;
+    private readonly FarmProvider _farmRepo;
 
     [BindProperty]
     public CreateInputModel Input { get; set; }
 
     public SelectList ProductSelectList { get; set; }
     public SelectList UnitSelectList { get; set; }
+    public SelectList FarmSelectList { get; set; }
 
     public CreateModel(HarvestManager harvestManager, IMapper mapper, 
-        UserManager<User> userManager, ProductProvider productRepo, UnitsOfMeasurementProvider uomRepo)
+        UserManager<User> userManager, ProductProvider productRepo, UnitsOfMeasurementProvider uomRepo, FarmProvider farmRepo)
     {
         _harvestManager = harvestManager;
         _mapper = mapper;
         _userManager = userManager;
         _productRepo = productRepo;
         _uomRepo = uomRepo;
+        _farmRepo = farmRepo;
     }
 
     public class CreateInputModel
@@ -55,6 +58,10 @@ public class CreateModel : PageModel
         [Required]
         [Display(Name = "Единица измерения")]
         public int UnitId { get; set; }
+        
+        [Required]
+        [Display(Name = "Ферма сбора")]
+        public int FarmId { get; set; }
     }
 
     public async Task OnGetAsync()
@@ -65,6 +72,9 @@ public class CreateModel : PageModel
         
         var units = await _uomRepo.GetAllAsync();
         UnitSelectList = new SelectList(units, "Id", "UoM");
+
+        var farms = await _farmRepo.GetAllAsync();
+        FarmSelectList = new SelectList(farms, "Id", "Name");
     }
 
     public async Task<IActionResult> OnPostAsync()
@@ -104,13 +114,16 @@ public class CreateModel : PageModel
 
         double baseQuantity = Input.Quantity * unit.ConversionFactor;
 
+        var farm = await _farmRepo.GetByIdAsync(Input.FarmId);
+
         var entity = new Harvest
         {
             DateHarvest = DateTime.SpecifyKind(Input.DateHarvest, DateTimeKind.Utc),
             Quantity = baseQuantity,
             ProductId = product.Id,
             UserId = user.Id,
-            UnitId = unit.Id
+            UnitId = unit.Id,
+            FarmId = farm.Id
         };
 
         await _harvestManager.AddAsync(entity);

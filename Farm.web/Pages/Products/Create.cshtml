@@ -22,8 +22,10 @@ ViewData["Title"] = "Добавление продукта";
     </div>
 
     <button type="submit" class="btn btn-success">Добавить</button>
-    <button type="button" onclick="history.back()">Назад</button>
+    <a asp-page="/Harvest/Index" class="btn btn-secondary">Отмена</a>
 </form>
+
+<button type="button" onclick="history.back()" class="btn btn-outline-secondary">Назад</button>
 
 @section Scripts {
 <partial name="_ValidationScriptsPartial" />
