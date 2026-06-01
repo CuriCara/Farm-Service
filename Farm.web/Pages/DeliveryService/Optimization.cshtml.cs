@@ -394,7 +394,7 @@ public class OptimizationModel : PageModel
         [Range(10, 1000, ErrorMessage = "Размер популяции должен быть от 10 до 1000.")]
         public int PopulationSize { get; set; } = 100;
 
-        [Range(100, 10000, ErrorMessage = "Количество поколений должно быть от 100 до 10000.")]
+        [Range(0, 10000, ErrorMessage = "Количество поколений должно быть от 100 до 10000.")]
         public int MaxGenerations { get; set; } = 300;
 
         [Range(0.0, 1.0, ErrorMessage = "Crossover rate должен быть от 0 до 1.")]

@@ -21,7 +21,7 @@ public class GeneticAlgorithm : IGeneticAlgorithm, IDisposable
     private readonly int RSeed;
     private readonly ThreadLocal<Random> _threadRandom;
     private readonly Random _masterRandom;
-    private Random R => _threadRandom.Value!;
+    public Random R => _threadRandom.Value!;
     
     private readonly int _populationSize;
     private readonly int _maxGenerations;
@@ -111,36 +111,36 @@ public class GeneticAlgorithm : IGeneticAlgorithm, IDisposable
             children = Crossover();
             newPopulation.AddRange(children);
             
-            // Мутация родителей — ПАРАЛЛЕЛЬНО
-            var parentMutation = new ConcurrentBag<Solution>();
-             Parallel.ForEach(_population, _parallelOptions, obj =>
-             {
-                 parentMutation.Add(Mutate(obj.Clone()));
-             });
-             newPopulation.AddRange(parentMutation);
+            //// Мутация родителей — ПАРАЛЛЕЛЬНО
+            // var parentMutation = new ConcurrentBag<Solution>();
+            //  Parallel.ForEach(_population, _parallelOptions, obj =>
+            //  {
+            //      parentMutation.Add(Mutate(obj.Clone()));
+            //  });
+            //  newPopulation.AddRange(parentMutation);
             
             // Детерминированные параллельные заполнения коллекции
-            // var parentMutation = new Solution[_populationSize];
-            // Parallel.For(0, _populationSize, _parallelOptions, i =>
-            // {
-            //     parentMutation[i] = Mutate(_population[i].Clone());
-            // });
-            // newPopulation.AddRange(parentMutation);
+            var parentMutation = new Solution[_populationSize];
+            Parallel.For(0, _populationSize, _parallelOptions, i =>
+            {
+                parentMutation[i] = Mutate(_population[i].Clone());
+            });
+            newPopulation.AddRange(parentMutation);
 
-            // Мутация детей 
-            var childrenMutation = new ConcurrentBag<Solution>();
-             Parallel.ForEach(children, _parallelOptions, obj =>
-             {
-                 childrenMutation.Add(Mutate(obj.Clone()));
-             });
-             newPopulation.AddRange(childrenMutation);
+            //// Мутация детей 
+            // var childrenMutation = new ConcurrentBag<Solution>();
+            //  Parallel.ForEach(children, _parallelOptions, obj =>
+            //  {
+            //      childrenMutation.Add(Mutate(obj.Clone()));
+            //  });
+            //  newPopulation.AddRange(childrenMutation);
 
-            // var childrenMutation = new Solution[_populationSize];
-            // Parallel.For(0, _populationSize, _parallelOptions, i =>
-            // {
-            //     childrenMutation[i] = Mutate(children[i].Clone());
-            // });
-            // newPopulation.AddRange(childrenMutation);
+            var childrenMutation = new Solution[_populationSize];
+            Parallel.For(0, _populationSize, _parallelOptions, i =>
+            {
+                childrenMutation[i] = Mutate(children[i].Clone());
+            });
+            newPopulation.AddRange(childrenMutation);
 
             // Оценка всех особей
             EvaluatePopulation(newPopulation);
@@ -157,6 +157,7 @@ public class GeneticAlgorithm : IGeneticAlgorithm, IDisposable
             _population = newPopulation
                 .DistinctBy(HashSolution) // Убираем дубликаты 
                 .OrderBy(s => s.TotalFitness)
+                .ThenBy(s => HashSolution(s)) // Детерминированный порядок при равных fitness
                 .Take(_populationSize)
                 .Select(s => s.Clone()) // Клонируем при отборе
                 .ToList();
@@ -394,16 +395,16 @@ public class GeneticAlgorithm : IGeneticAlgorithm, IDisposable
                                                  metrics.TotalFuelCost * 0.5 +
                                                  metrics.TotalTimeViolations * 2000.0 +
                                                  metrics.AllFineOnSol * 500.0,
-            FitnessObjective.MinimizeDistance => metrics.TotalVehiclesUsed * 100.0 + metrics.TotalDistance * 20.0 +
-                                                 metrics.TotalFuelCost * 5.0 +
+            FitnessObjective.MinimizeDistance => metrics.TotalVehiclesUsed * 100.0 + metrics.TotalDistance * 10.0 +
+                                                 metrics.TotalFuelCost * 3.5 +
                                                  metrics.TotalTimeViolations * 3000.0 +
                                                  metrics.AllFineOnSol * 1000.0,
             FitnessObjective.MinimizeTimeViolations => metrics.TotalVehiclesUsed * 10.0 + metrics.TotalDistance * 2.0 +
                                                        metrics.TotalFuelCost * 1.0 +
                                                        metrics.TotalTimeViolations * 10000.0 +
                                                        metrics.AllFineOnSol * 2000.0,
-            _ => metrics.TotalVehiclesUsed * 100.0 + metrics.TotalDistance * 20.0 +
-                 metrics.TotalFuelCost * 5.0 + metrics.TotalTimeViolations * 3000.0 + metrics.AllFineOnSol * 1000.0
+            _ => metrics.TotalVehiclesUsed * 100.0 + metrics.TotalDistance * 10.0 +
+                 metrics.TotalFuelCost * 3.5 + metrics.TotalTimeViolations * 3000.0 + metrics.AllFineOnSol * 1000.0
         };
     }
 
@@ -427,38 +428,37 @@ public class GeneticAlgorithm : IGeneticAlgorithm, IDisposable
     
     private List<Solution> Crossover()
     {
-        var children = new ConcurrentBag<Solution>(); // Потокобезопасная коллекция
-        var targetCount = _populationSize;
-    
+        var children = new Solution[_populationSize]; // Детерментрованная коллекция для Random
+        
         // Генерируем детей параллельно
-        Parallel.For(0, targetCount, _parallelOptions, (int i) =>
+        Parallel.For(0, _populationSize, _parallelOptions, (int i) =>
         {
             var parent1 = TournamentSelection();
             var parent2 = TournamentSelection();
 
             if (R.NextDouble() > _crossoverRate)
             {
-                children.Add(parent1.Clone());
+                children[i] = parent1.Clone(); // ← Присваиваем по индексу
                 return;
             }
 
-            var child = CreateChildFromParents(parent1, parent2); // Вынесли логику в отдельный метод
-        
+            var child = CreateChildFromParents(parent1, parent2);
+    
             // Валидация
             if (ValidateTaskPairs(child) && 
                 child.Routes.SelectMany(r => r.Genes.Select(g => g.TaskId)).Distinct().Count() == 
                 GetUniqueTaskIds(parent1, parent2).Count())
             {
-                children.Add(child.Clone());
+                children[i] = child.Clone(); // ← Присваиваем по индексу
             }
             else
             {
                 // fallback: добавляем родителя, если ребёнок невалиден
-                children.Add(parent1.Clone());
+                children[i] = parent1.Clone(); // ← Присваиваем по индексу
             }
         });
 
-        return children.Take(targetCount).ToList();
+        return children.ToList();
     }
 
 
@@ -725,7 +725,9 @@ public class GeneticAlgorithm : IGeneticAlgorithm, IDisposable
         // МЕЖМАРШРУТНАЯ МУТАЦИЯ (перенос одной операции)
         if (R.NextDouble() <= _mutationRate * 0.8 && solution.Routes.Count > 1)
         {
-            var srcRoute = solution.Routes.FirstOrDefault(r => r.Genes.Any());
+            var srcRoute = solution.Routes
+                .OrderBy(r => r.VehicleId)
+                .FirstOrDefault(r => r.Genes.Any());
             if (srcRoute != null)
             {
                 int idx = R.Next(srcRoute.Genes.Count);
@@ -733,7 +735,9 @@ public class GeneticAlgorithm : IGeneticAlgorithm, IDisposable
                 srcRoute.Genes.RemoveAt(idx);
 
                 // Выбираем маршрут-приёмник (предпочтительно другой VehicleId)
-                var dstRoute = solution.Routes.FirstOrDefault(r => r.VehicleId != srcRoute.VehicleId)
+                var dstRoute = solution.Routes
+                    .OrderBy(r => r.VehicleId) 
+                    .FirstOrDefault(r => r.VehicleId != srcRoute.VehicleId)
                                ?? solution.Routes[R.Next(solution.Routes.Count)];
 
                 dstRoute.Genes.Insert(R.Next(dstRoute.Genes.Count + 1), geneToMove);
@@ -839,15 +843,18 @@ public class GeneticAlgorithm : IGeneticAlgorithm, IDisposable
 
         // Делаем распределение неравномерным:
         // одна хромосома может получить заметно больше пар, другая меньше.
-        var routeWeights = routesToKeep.ToDictionary(
-            route => route,
-            route => 0.1 + R.NextDouble());
+        // Создаём список с весами (детерминированный порядок)
+        var routeWeights = routesToKeep
+            .Select(route => (route, weight: 0.1 + R.NextDouble()))
+            .ToList();
 
         foreach (var pair in pairsToRedistribute.OrderBy(_ => R.Next()))
         {
-            var targetRoute = _pairMethod.PickWeightedRoute(routesToKeep, routeWeights);
-            _pairMethod.InsertTaskPairIntoRoute(targetRoute, pair.Load, pair.Unload);
+            // Выбираем маршрут с учётом весов
+            var targetRoute = _pairMethod.PickWeightedRouteFromList(routeWeights, R);
+            _pairMethod.InsertTaskPairIntoRoute(targetRoute, pair.Load, pair.Unload, R);
         }
+
 
         solution.Routes.RemoveAll(r => !r.Genes.Any());
     }

@@ -27,15 +27,15 @@ public class SubMethodForPair
     }
     
     // Метод для вставки пар
-    public void InsertTaskPairIntoRoute(Chromosome route, Gene loadGene, Gene unloadGene)
+    public void InsertTaskPairIntoRoute(Chromosome route, Gene loadGene, Gene? unloadGene, Random random)
     {
         int loadPos = route.Genes.Count > 0
-            ? Random.Shared.Next(0, route.Genes.Count + 1)
+            ? random.Next(0, route.Genes.Count + 1)
             : 0;
 
         route.Genes.Insert(loadPos, loadGene);
 
-        int unloadPos = Random.Shared.Next(loadPos + 1, route.Genes.Count + 1);
+        int unloadPos = random.Next(loadPos + 1, route.Genes.Count + 1);
         route.Genes.Insert(unloadPos, unloadGene);
     }
     
@@ -58,4 +58,25 @@ public class SubMethodForPair
 
         return routes[^1];
     }
+    
+    // Метод для распределения веса хромосом для выборки со списком (детерминированный)
+    public Chromosome PickWeightedRouteFromList(List<(Chromosome route, double weight)>? routeWeights, Random R)
+    {
+        if (routeWeights.Count == 1)
+            return routeWeights[0].route;
+
+        double totalWeight = routeWeights.Sum(rw => rw.weight);
+        double roll = R.NextDouble() * totalWeight;
+
+        double cumulative = 0;
+        foreach (var (route, weight) in routeWeights)
+        {
+            cumulative += weight;
+            if (roll <= cumulative)
+                return route;
+        }
+
+        return routeWeights[^1].route;
+    }
+
 }

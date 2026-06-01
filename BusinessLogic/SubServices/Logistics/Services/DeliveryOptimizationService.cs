@@ -414,7 +414,7 @@ public class DeliveryOptimizationService
                    randomSeed: request.RandomSeed,
                    farmMutationRate: request.FarmMutationRate ?? _gaConfig.FarmMutationRate,
                    logger: _gaLogger,
-                   maxDegreeOfParallelism: 3
+                   maxDegreeOfParallelism: 1
                ))
         {
 
