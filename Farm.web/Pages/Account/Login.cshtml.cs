@@ -14,6 +14,9 @@ public class LoginModel : PageModel
         _signInManager = signInManager;
         _userManager = userManager;
     }
+    
+    [BindProperty(SupportsGet = true)]
+    public string? ReturnUrl { get; set; }
 
     [BindProperty]
     public LoginInputModel Input { get; set; }
@@ -49,7 +52,13 @@ public class LoginModel : PageModel
         var result = await _signInManager.PasswordSignInAsync(user.UserName, Input.Password, false, false);
         if (result.Succeeded)
         {
-            return RedirectToPage("/Harvest/Index"); // можно изменить путь
+            // 🔥 ВОТ ГЛАВНОЕ
+            if (!string.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
+            {
+                return Redirect(ReturnUrl);
+            }
+
+            return RedirectToPage("/Index");
         }
 
         ModelState.AddModelError(string.Empty, "Неверные учетные данные");

@@ -1,35 +1,43 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-    </PropertyGroup>
+      <UserSecretsId>da96f8a6-5fc3-4998-a596-e6db61757415</UserSecretsId>
+  </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AutoMapper" Version="13.0.1" />
+        <PackageReference Include="AutoMapper" Version="14.0.0" />
         <PackageReference Include="DinkToPdf" Version="1.0.8" />
         <PackageReference Include="Duende.IdentityServer" Version="7.1.0-rc.1" />
         <PackageReference Include="FluentValidation" Version="11.10.0" />
         <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
-        <PackageReference Include="graphhopper" Version="1.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
         <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.11" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.26" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.Service" Version="1.0.0-preview1-final" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.11" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0-rc.2.24474.1" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0-rc.2.24474.1">
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.15" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.15">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0-rc.2" />
+        <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.15" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+        <PackageReference Include="Moq" Version="4.20.72" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
         <PackageReference Include="SendGrid" Version="9.29.3" />
         <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
         <PackageReference Include="Serilog.Enrichers.CorrelationId" Version="3.0.1" />
         <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
         <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="7.0.0" />
+        <PackageReference Include="xunit" Version="2.9.3" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>    
 
     <ItemGroup>
@@ -38,144 +46,77 @@
       <ProjectReference Include="..\Farm.web\Farm.web.csproj" />
     </ItemGroup>    
 
-    <ItemGroup>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-grid.css">
-        <Link>wwwroot\css\bootstrap-grid.css</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-grid.css.map">
-        <Link>wwwroot\css\bootstrap-grid.css.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-grid.min.css">
-        <Link>wwwroot\css\bootstrap-grid.min.css</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-grid.min.css.map">
-        <Link>wwwroot\css\bootstrap-grid.min.css.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-grid.rtl.css">
-        <Link>wwwroot\css\bootstrap-grid.rtl.css</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-grid.rtl.css.map">
-        <Link>wwwroot\css\bootstrap-grid.rtl.css.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-grid.rtl.min.css">
-        <Link>wwwroot\css\bootstrap-grid.rtl.min.css</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-grid.rtl.min.css.map">
-        <Link>wwwroot\css\bootstrap-grid.rtl.min.css.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-reboot.css">
-        <Link>wwwroot\css\bootstrap-reboot.css</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-reboot.css.map">
-        <Link>wwwroot\css\bootstrap-reboot.css.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-reboot.min.css">
-        <Link>wwwroot\css\bootstrap-reboot.min.css</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-reboot.min.css.map">
-        <Link>wwwroot\css\bootstrap-reboot.min.css.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-reboot.rtl.css">
-        <Link>wwwroot\css\bootstrap-reboot.rtl.css</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-reboot.rtl.css.map">
-        <Link>wwwroot\css\bootstrap-reboot.rtl.css.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-reboot.rtl.min.css">
-        <Link>wwwroot\css\bootstrap-reboot.rtl.min.css</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-reboot.rtl.min.css.map">
-        <Link>wwwroot\css\bootstrap-reboot.rtl.min.css.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-utilities.css">
-        <Link>wwwroot\css\bootstrap-utilities.css</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-utilities.css.map">
-        <Link>wwwroot\css\bootstrap-utilities.css.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-utilities.min.css">
-        <Link>wwwroot\css\bootstrap-utilities.min.css</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-utilities.min.css.map">
-        <Link>wwwroot\css\bootstrap-utilities.min.css.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-utilities.rtl.css">
-        <Link>wwwroot\css\bootstrap-utilities.rtl.css</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-utilities.rtl.css.map">
-        <Link>wwwroot\css\bootstrap-utilities.rtl.css.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-utilities.rtl.min.css">
-        <Link>wwwroot\css\bootstrap-utilities.rtl.min.css</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap-utilities.rtl.min.css.map">
-        <Link>wwwroot\css\bootstrap-utilities.rtl.min.css.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap.css">
-        <Link>wwwroot\css\bootstrap.css</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap.css.map">
-        <Link>wwwroot\css\bootstrap.css.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap.min.css">
-        <Link>wwwroot\css\bootstrap.min.css</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap.min.css.map">
-        <Link>wwwroot\css\bootstrap.min.css.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap.rtl.css">
-        <Link>wwwroot\css\bootstrap.rtl.css</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap.rtl.css.map">
-        <Link>wwwroot\css\bootstrap.rtl.css.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap.rtl.min.css">
-        <Link>wwwroot\css\bootstrap.rtl.min.css</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\css\bootstrap.rtl.min.css.map">
-        <Link>wwwroot\css\bootstrap.rtl.min.css.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\js\bootstrap.bundle.js">
-        <Link>wwwroot\js\bootstrap.bundle.js</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\js\bootstrap.bundle.js.map">
-        <Link>wwwroot\js\bootstrap.bundle.js.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\js\bootstrap.bundle.min.js">
-        <Link>wwwroot\js\bootstrap.bundle.min.js</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\js\bootstrap.bundle.min.js.map">
-        <Link>wwwroot\js\bootstrap.bundle.min.js.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\js\bootstrap.esm.js">
-        <Link>wwwroot\js\bootstrap.esm.js</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\js\bootstrap.esm.js.map">
-        <Link>wwwroot\js\bootstrap.esm.js.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\js\bootstrap.esm.min.js">
-        <Link>wwwroot\js\bootstrap.esm.min.js</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\js\bootstrap.esm.min.js.map">
-        <Link>wwwroot\js\bootstrap.esm.min.js.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\js\bootstrap.js">
-        <Link>wwwroot\js\bootstrap.js</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\js\bootstrap.js.map">
-        <Link>wwwroot\js\bootstrap.js.map</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\js\bootstrap.min.js">
-        <Link>wwwroot\js\bootstrap.min.js</Link>
-      </Content>
-      <Content Include="C:\Users\dark7\.nuget\packages\bootstrap\5.3.6\contentFiles\any\any\wwwroot\js\bootstrap.min.js.map">
-        <Link>wwwroot\js\bootstrap.min.js.map</Link>
-      </Content>
-    </ItemGroup>
+   
   <ItemGroup>
     <None Update="NativeLibs\libwkhtmltox.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>    
+
+   
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\css\site.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\table.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\favicon.ico" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\form.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\site.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.min.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\LICENSE" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery-validation\dist\additional-methods.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery-validation\dist\additional-methods.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery-validation\dist\jquery.validate.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery-validation\dist\jquery.validate.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery-validation\LICENSE.md" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\dist\jquery.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\dist\jquery.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\dist\jquery.min.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\LICENSE.txt" />
   </ItemGroup>
 
   

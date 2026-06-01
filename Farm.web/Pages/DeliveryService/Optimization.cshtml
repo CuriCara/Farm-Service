@@ -1,0 +1,484 @@
+@page
+@model Farm.web.Pages.DeliveryService.OptimizationModel
+@{
+ViewData["Title"] = "Оптимизация маршрутов";
+}
+
+<h3>Оптимизация маршрутов</h3>
+
+<div class="alert alert-info">
+    <strong>Внимание:</strong> Первый запуск может занять 5-15 минут
+    (расчёт матрицы расстояний), если до этого его не было. Повторные запуски должны идти быстрее.
+</div>
+
+<a asp-page="/DeliveryService/OptimizationRuns" class="btn btn-info">Прошлые варианты оптимизации</a>
+
+<!-- Добавить перед формой оптимизации: -->
+<div class="card mb-3">
+    <div class="card-header">Статус кеша расстояний</div>
+    <div class="card-body">
+        @if (Model.IsCacheLoaded)
+        {
+        <div class="alert alert-success">
+            ✅ Кеш загружен в память (@Model.CachedPointsCount точек)
+        </div>
+        }
+        else
+        {
+        <div class="alert alert-warning">
+            ⚠️ Кеш не загружен. Загрузите перед оптимизацией.
+        </div>
+        }
+
+        <form method="post" asp-page-handler="LoadCache" class="d-inline">
+            <button type="submit" class="btn btn-primary">
+                Загрузить кеш в память
+            </button>
+        </form>
+
+        <form method="post" asp-page-handler="RecalculateCache" class="d-inline">
+            <button type="submit" class="btn btn-warning">
+                Пересчитать матрицу в Redis
+            </button>
+        </form>
+        
+        <form method="post" asp-page-handler="ReloadCache" class="d-inline">
+            <button type="submit" class="btn btn-primary">
+                Проверка полноты матрицы в Redis
+            </button>
+        </form>
+
+        <form method="post" asp-page-handler="DropCache" class="d-inline">
+            <button type="submit" class="btn btn-warning">
+                Очистить кеш Redis
+            </button>
+        </form>
+    </div>
+</div>
+
+@if (Model.Logs.Any())
+{
+<div class="card mb-3">
+    <div class="card-header">Лог выполнения</div>
+    <div class="card-body" style="max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 0.9em;">
+        @foreach (var log in Model.Logs)
+        {
+        var css = log.StartsWith("❌")
+        ? "text-danger"
+        : log.StartsWith("✅")
+        ? "text-success"
+        : "";
+
+        <div class="@css">@log</div>
+        }
+    </div>
+</div>
+}
+
+<form method="post" asp-page-handler="Run" class="mt-3 mb-4">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="card">
+        <div class="card-header">Параметры запуска</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label asp-for="Input.TestDate" class="form-label">Дата доставки</label>
+                    <input asp-for="Input.TestDate" type="date" class="form-control" />
+                    <span asp-validation-for="Input.TestDate" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.StoreCount" class="form-label">Количество магазинов</label>
+                    <input asp-for="Input.StoreCount" type="number" min="1" max="@Model.StoreCountMax" class="form-control" />
+                    <span asp-validation-for="Input.StoreCount" class="text-danger"></span>
+
+                    @if (Model.AvailableStoreCount > 0)
+                    {
+                    <div class="form-text">Доступно на выбранную дату: @Model.AvailableStoreCount</div>
+                    }
+                    else
+                    {
+                    <div class="form-text">На эту дату планы ещё не найдены. При запуске могут быть созданы тестовые данные.</div>
+                    }
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.FitnessObjective" class="form-label">Вариант fitness</label>
+                    <select asp-for="Input.FitnessObjective" class="form-select">
+                        @foreach (var objective in Model.FitnessObjectives)
+                        {
+                        <option value="@objective">@objective</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="Input.PopulationSize" class="form-label">Размер популяции</label>
+                    <input asp-for="Input.PopulationSize" type="number" class="form-control" />
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="Input.MaxGenerations" class="form-label">Количество поколений</label>
+                    <input asp-for="Input.MaxGenerations" type="number" class="form-control" />
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="Input.CrossoverRate" class="form-label">Crossover rate</label>
+                    <input asp-for="Input.CrossoverRate" type="number" step="0.01" min="0" max="1" class="form-control" />
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="Input.TournamentSize" class="form-label">Tournament size</label>
+                    <input asp-for="Input.TournamentSize" type="number" class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.MutationRate" class="form-label">Общая мутация</label>
+                    <input asp-for="Input.MutationRate" type="number" step="0.01" min="0" max="1" class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.VehicleMutationRate" class="form-label">Мутация машины</label>
+                    <input asp-for="Input.VehicleMutationRate" type="number" step="0.01" min="0" max="1" class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.FarmMutationRate" class="form-label">Мутация фермы</label>
+                    <input asp-for="Input.FarmMutationRate" type="number" step="0.01" min="0" max="1" class="form-control" />
+                </div>
+                
+                <div class="col-md-3">
+                    <label asp-for="Input.Seed" class="form-label">Seed рандома</label>
+                    <input asp-for="Input.Seed" type="number" class="form-control" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3" disabled="@Model.IsRunning">
+        @(Model.IsRunning ? "Оптимизация идёт..." : "Запустить оптимизацию")
+    </button>
+</form>
+
+@if (Model.Result != null)
+{
+<div class="row g-3">
+    @if (Model.Result?.RunInfo != null)
+    {
+    var info = Model.Result.RunInfo;
+
+    <div class="card mt-4">
+        <div class="card-header">Параметры запуска</div>
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-md-3"><strong>Seed:</strong> @info.Seed</div>
+                <div class="col-md-3"><strong>Fitness:</strong> @info.FitnessObjective</div>
+                <div class="col-md-3"><strong>Популяция:</strong> @info.PopulationSize</div>
+                <div class="col-md-3"><strong>Поколений:</strong> @info.MaxGenerations</div>
+
+                <div class="col-md-3"><strong>Crossover:</strong> @info.CrossoverRate</div>
+                <div class="col-md-3"><strong>Mutation:</strong> @info.MutationRate</div>
+
+                <div class="col-md-3"><strong>Mutation:</strong> @info.MutationRate</div>
+
+                <div class="col-md-3"><strong>CPU:</strong> @info.AvgCpuUsage.ToString("F1")%</div>
+                <div class="col-md-3"><strong>RAM:</strong> @info.MaxMemoryMb.ToString("F0") MB</div>
+                <div class="col-md-3"><strong>Время:</strong> @(info.ExecutionTimeMs / 1000.0) сек</div>
+            </div>
+        </div>
+    </div>
+    }
+</div>
+
+@if (Model.Result.Warning != null)
+{
+<div class="alert alert-warning mt-3">
+    @Model.Result.Warning
+</div>
+}
+
+@if (Model.ExecutionTime.HasValue)
+{
+<div class="alert alert-secondary mt-3">
+    Время выполнения: <strong>@Model.ExecutionTime.Value.TotalSeconds.ToString("F2")</strong> секунд
+</div>
+}
+
+@if (Model.Result.Routes.Any())
+{
+<div class="card mt-4">
+    <div class="card-header">Карта маршрутов</div>
+    <div class="card-body">
+        <div id="routeLegend" class="d-flex flex-wrap gap-2 mb-3"></div>
+        <div id="routesMap" style="height: 700px; width: 100%; border-radius: 12px;"></div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">Маршруты</div>
+    <div class="card-body">
+        <div class="row g-3">
+            @foreach (var route in Model.Result.Routes)
+            {
+            <div class="col-md-6">
+                <div class="card h-100 border-secondary">
+                    <div class="card-body">
+                        <h5 class="card-title">Маршрут #@route.Id</h5>
+                        <div><strong>Машина:</strong> @(route.VehicleId?.ToString() ?? "-")</div>
+                        <div><strong>Остановок:</strong> @route.Stops.Count</div>
+                        <div><strong>Дистанция:</strong> @route.DistanceKm.ToString("F1") км</div>
+                        <div><strong>Время:</strong> @OptimizationModel.FormatTime(@route.TimeHours)</div>
+                        <div><strong>Загрузка:</strong> @route.TotalLoadKg.ToString("F1") кг</div>
+                        <div><strong>Процент загруженности:</strong> @route.CapacityUtilization.ToString("F1")%</div>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+}
+
+@if (Model.Result.FitnessHistory?.Any() == true)
+{
+    <div class="card mt-4">
+        <div class="card-header">История улучшения fitness</div>
+        <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+            <ul class="list-group list-group-flush">
+                @for (int i = 0; i < Model.Result.FitnessHistory.Count; i++)
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Поколение @i</span>
+                        <strong>@Model.Result.FitnessHistory[i].ToString("F6")</strong>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+}
+<a href="@Request.Headers["Referer"]" class="btn btn-secondary">Назад</a>
+}
+
+@section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    @if (Model.Result?.Routes?.Any() == true)
+    {
+        <script>
+    const routes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Result.Routes));
+    const map = L.map('routesMap');
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const colors = [
+        '#e63946', '#1d3557', '#2a9d8f', '#f4a261', '#6a4c93',
+        '#1982c4', '#8ac926', '#ff595e', '#ffca3a', '#ff924c'
+    ];
+
+    const routeLayers = new Map();
+    let activeRouteId = null;
+    const legendContainer = document.getElementById('routeLegend');
+
+    function getStopLabel(stop) {
+        if (stop.LocationType === 2) return 'Депо';
+        if (stop.LocationType === 0) return `Ферма #${stop.FarmId ?? '-'}`;
+        if (stop.LocationType === 1) return `Магазин #${stop.StoreId ?? '-'}`;
+        return 'Точка';
+    }
+
+    function buildRouteLayer(route, color) {
+        const group = L.layerGroup();
+        const boundsParts = [];
+
+        const streetPath = (route.StreetPath || [])
+            .map(point => [point.Latitude, point.Longitude])
+            .filter(p => Number.isFinite(p[0]) && Number.isFinite(p[1]));
+
+        if (streetPath.length > 1) {
+            const halo = L.polyline(streetPath, {
+                color: '#ffffff',
+                weight: 10,
+                opacity: 0.95,
+                interactive: false
+            });
+
+            const line = L.polyline(streetPath, {
+                color: color,
+                weight: 5,
+                opacity: 0.95
+            }).bindPopup(`Маршрут #${route.Id}<br>Машина #${route.VehicleId ?? '-'}`);
+
+            group.addLayer(halo);
+            group.addLayer(line);
+            boundsParts.push(line);
+        }
+
+        (route.Stops || []).forEach(stop => {
+            if (!stop.Location) return;
+
+            const lat = stop.Location.Latitude;
+            const lng = stop.Location.Longitude;
+
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+            const marker = L.circleMarker([lat, lng], {
+                radius: stop.LocationType === 2 ? 8 : 6,
+                color: color,
+                weight: stop.LocationType === 2 ? 3 : 2,
+                fillColor: stop.LocationType === 2 ? '#111111' : color,
+                fillOpacity: 0.9
+            }).bindPopup(
+                `Маршрут #${route.Id}<br>` +
+                `Машина #${route.VehicleId ?? '-'}<br>` +
+                `${getStopLabel(stop)}<br>` +
+                `Остановка ${stop.StopIndex}`
+            ).bindTooltip(`${stop.StopIndex}`, {
+                permanent: true,
+                direction: 'top',
+                offset: [0, -6],
+                className: 'route-stop-label'
+            });
+
+            group.addLayer(marker);
+            boundsParts.push(marker);
+        });
+
+        const bounds = boundsParts.length
+            ? L.featureGroup(boundsParts).getBounds()
+            : null;
+
+        return { group, bounds };
+    }
+
+    function showOnlyRoute(routeId) {
+        routeLayers.forEach((value) => {
+            if (map.hasLayer(value.group)) {
+                map.removeLayer(value.group);
+            }
+        });
+
+        const selected = routeLayers.get(routeId);
+        if (!selected) return;
+
+        selected.group.addTo(map);
+
+        if (selected.bounds?.isValid()) {
+            map.fitBounds(selected.bounds, { padding: [30, 30] });
+        }
+
+        activeRouteId = routeId;
+        updateLegendState();
+    }
+
+    function showAllRoutes() {
+        routeLayers.forEach((value) => {
+            if (!map.hasLayer(value.group)) {
+                value.group.addTo(map);
+            }
+        });
+
+        const allBounds = [];
+        routeLayers.forEach((value) => {
+            if (value.bounds?.isValid()) {
+                allBounds.push(value.bounds);
+            }
+        });
+
+        if (allBounds.length > 0) {
+            const fg = L.featureGroup(
+                Array.from(routeLayers.values())
+                    .filter(x => x.bounds?.isValid())
+                    .map(x => L.rectangle(x.bounds))
+            );
+
+            map.fitBounds(fg.getBounds(), { padding: [30, 30] });
+        }
+
+        activeRouteId = null;
+        updateLegendState();
+    }
+
+    function updateLegendState() {
+        document.querySelectorAll('[data-route-id]').forEach(btn => {
+            const routeId = Number(btn.dataset.routeId);
+            const isActive = activeRouteId === routeId;
+
+            btn.classList.toggle('btn-dark', isActive);
+            btn.classList.toggle('text-white', isActive);
+            btn.classList.toggle('btn-outline-secondary', !isActive);
+        });
+
+        const allBtn = document.getElementById('showAllRoutesBtn');
+        if (allBtn) {
+            allBtn.classList.toggle('btn-dark', activeRouteId === null);
+            allBtn.classList.toggle('btn-outline-dark', activeRouteId !== null);
+        }
+    }
+
+    function renderLegend() {
+        if (!legendContainer) return;
+
+        let html = '';
+
+        routes.forEach((route, index) => {
+            const color = colors[index % colors.length];
+
+            html += `
+                        <button
+                            type="button"
+                            data-route-id="${route.Id}"
+                            onclick="window.selectRoute(${route.Id})"
+                            class="btn btn-sm btn-outline-secondary text-start"
+                            style="border-left: 10px solid ${color}; min-width: 240px;">
+                            Маршрут #${route.Id} / машина #${route.VehicleId ?? '-'}
+                        </button>`;
+        });
+
+        html += `
+                    <button
+                        id="showAllRoutesBtn"
+                        type="button"
+                        onclick="window.showAllRoutes()"
+                        class="btn btn-sm btn-outline-dark">
+                        Показать все
+                    </button>`;
+
+        legendContainer.innerHTML = html;
+    }
+
+    routes.forEach((route, index) => {
+        const color = colors[index % colors.length];
+        const built = buildRouteLayer(route, color);
+        routeLayers.set(route.Id, built);
+    });
+
+    window.selectRoute = showOnlyRoute;
+    window.showAllRoutes = showAllRoutes;
+
+    renderLegend();
+
+    if (routes.length > 0) {
+        showOnlyRoute(routes[0].Id);
+    } else {
+        map.setView([55.75, 37.61], 10);
+    }
+</script>
+
+        <style>
+    .route-stop-label {
+        background: rgba(255,255,255,0.92);
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        color: #222;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 6px;
+        box-shadow: none;
+    }
+</style>
+    }
+}

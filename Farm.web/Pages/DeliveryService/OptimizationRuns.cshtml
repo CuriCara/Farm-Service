@@ -1,0 +1,282 @@
+@page
+@model WebApp.Pages.OptimizationRuns.IndexModel
+
+@{
+ViewData["Title"] = "Optimization Runs";
+}
+
+<h2 class="mb-3">Optimization Runs</h2>
+
+<form method="get" class="mb-4">
+    <select name="SelectedRunId" onchange="this.form.submit()" class="form-select w-auto">
+        <option value="">-- Select Run --</option>
+        @foreach (var run in Model.Runs)
+        {
+        <option value="@run.Id" selected="@(run.Id == Model.SelectedRunId)">
+            Run @run.Id | @run.PlanningDate.ToShortDateString() | Fitness: @run.BestFitness.ToString("F3")
+        </option>
+        }
+    </select>
+</form>
+
+@if (Model.SelectedRun != null)
+{
+<h3>Run Details</h3>
+
+<!-- 🔷 Основные метрики -->
+<div class="row g-3 mb-3">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white text-center">
+            <div class="card-body">
+                <h3>@Model.SelectedRun.TotalDistance.ToString("F1")</h3>
+                <p class="mb-0">Км</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-success text-white text-center">
+            <div class="card-body">
+                <h3>@Model.SelectedRun.TotalVehiclesUsed</h3>
+                <p class="mb-0">Машин</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-info text-white text-center">
+            <div class="card-body">
+                <h3>@Model.SelectedRun.BestFitness.ToString("F3")</h3>
+                <p class="mb-0">Fitness</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark text-center">
+            <div class="card-body">
+                <h3>@((Model.SelectedRun.ExecutionTimeMs / 1000.0).ToString("F2"))</h3>
+                <p class="mb-0">сек</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ⚙ Параметры -->
+<div class="card mb-3">
+    <div class="card-header">Параметры запуска</div>
+    <div class="card-body row g-2">
+        <div class="col-md-3"><b>Seed:</b> @Model.SelectedRun.Seed</div>
+        <div class="col-md-3"><b>Fitness:</b> @Model.SelectedRun.FitnessObjective</div>
+        <div class="col-md-3"><b>Популяция:</b> @Model.SelectedRun.PopulationSize</div>
+        <div class="col-md-3"><b>Поколений:</b> @Model.SelectedRun.MaxGenerations</div>
+        <div class="col-md-3"><b>Мутация общая:</b> @((Model.SelectedRun.MutationRate * 100).ToString("F1"))%</div>
+        <div class="col-md-3"><b>Мутация фермы:</b> @((Model.SelectedRun.MutationFarmRate * 100).ToString("F1"))%</div>
+        <div class="col-md-3"><b>Мутация машины:</b> @((Model.SelectedRun.MutationVehicleRate * 100).ToString("F1"))%</div>
+        
+        <div class="col-md-3"><b>CPU:</b> @Model.SelectedRun.AvgCpuUsage.ToString("F1")%</div>
+        <div class="col-md-3"><b>RAM:</b> @Model.SelectedRun.MaxMemoryMb.ToString("F0") MB</div>
+        <div class="col-md-3"><b>Топливо:</b> @Model.SelectedRun.FuelCost.ToString("F0") ₽</div>
+        <div class="col-md-3"><b>Нарушения:</b> @Model.SelectedRun.TotalTimeViolations</div>
+    </div>
+</div>
+
+<!-- 🗺 Карта -->
+<div class="card">
+    <div class="card-header">Карта маршрутов</div>
+    <div class="card-body">
+        <div id="routeLegend" class="d-flex flex-wrap gap-2 mb-3"></div>
+        <div id="map" style="height: 600px; width: 100%; border-radius: 12px;"></div>
+    </div>
+</div>
+}
+
+@if (Model.SelectedRun != null && Model.Routes?.Any() == true)
+{
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const mapElement = document.getElementById('map');
+    if (!mapElement) return;
+
+    const routes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Routes)) || [];
+
+    console.log("ROUTES:", routes);
+
+    const map = L.map('map');
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const colors = [
+        '#e63946', '#1d3557', '#2a9d8f', '#f4a261', '#6a4c93',
+        '#1982c4', '#8ac926', '#ff595e', '#ffca3a', '#ff924c'
+    ];
+
+    const routeLayers = new Map();
+    let activeRouteId = null;
+
+    const legendContainer = document.getElementById('routeLegend');
+
+    function getStopLabel(stop) {
+        if (stop.LocationType === 2) return 'Депо';
+        if (stop.LocationType === 0) return `Ферма #${stop.FarmId ?? '-'}`;
+        if (stop.LocationType === 1) return `Магазин #${stop.StoreId ?? '-'}`;
+        return 'Точка';
+    }
+
+    function buildRouteLayer(route, color) {
+        const group = L.layerGroup();
+        const boundsParts = [];
+
+        const streetPath = (route.StreetPath || [])
+            .map(p => [p.Latitude, p.Longitude])
+            .filter(p => Number.isFinite(p[0]) && Number.isFinite(p[1]));
+
+        if (streetPath.length > 1) {
+            const halo = L.polyline(streetPath, {
+                color: '#ffffff',
+                weight: 10,
+                opacity: 0.9,
+                interactive: false
+            });
+
+            const line = L.polyline(streetPath, {
+                color: color,
+                weight: 5
+            });
+
+            group.addLayer(halo);
+            group.addLayer(line);
+            boundsParts.push(line);
+        }
+
+        (route.Stops || []).forEach(stop => {
+            if (!stop.Location) return;
+
+            const lat = stop.Location.Latitude;
+            const lng = stop.Location.Longitude;
+
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+            const marker = L.circleMarker([lat, lng], {
+                radius: stop.LocationType === 2 ? 8 : 6,
+                color: color,
+                weight: stop.LocationType === 2 ? 3 : 2,
+                fillColor: stop.LocationType === 2 ? '#111' : color,
+                fillOpacity: 0.9
+            }).bindPopup(
+                `Маршрут #${route.Id}<br>` +
+                `Машина #${route.VehicleId ?? '-'}<br>` +
+                `${getStopLabel(stop)}<br>` +
+                `Остановка ${stop.StopIndex}`
+            );
+
+            group.addLayer(marker);
+            boundsParts.push(marker);
+        });
+
+        const bounds = boundsParts.length
+            ? L.featureGroup(boundsParts).getBounds()
+            : null;
+
+        return { group, bounds };
+    }
+
+    function showOnlyRoute(routeId) {
+
+        routeLayers.forEach(v => {
+            if (map.hasLayer(v.group)) {
+                map.removeLayer(v.group);
+            }
+        });
+
+        const selected = routeLayers.get(routeId);
+        if (!selected) return;
+
+        selected.group.addTo(map);
+
+        if (selected.bounds?.isValid()) {
+            map.fitBounds(selected.bounds, { padding: [30, 30] });
+        }
+
+        activeRouteId = routeId;
+        updateLegend();
+    }
+
+    function showAllRoutes() {
+
+        routeLayers.forEach(v => v.group.addTo(map));
+
+        const all = [];
+        routeLayers.forEach(v => {
+            if (v.bounds?.isValid()) {
+                all.push(v.bounds);
+            }
+        });
+
+        if (all.length > 0) {
+            const fg = L.featureGroup(all.map(b => L.rectangle(b)));
+            map.fitBounds(fg.getBounds(), { padding: [30, 30] });
+        }
+
+        activeRouteId = null;
+        updateLegend();
+    }
+
+    function updateLegend() {
+        document.querySelectorAll('[data-route-id]').forEach(btn => {
+            const id = Number(btn.dataset.routeId);
+            const active = activeRouteId === id;
+
+            btn.classList.toggle('btn-dark', active);
+            btn.classList.toggle('text-white', active);
+            btn.classList.toggle('btn-outline-secondary', !active);
+        });
+    }
+
+    function renderLegend() {
+
+        let html = '';
+
+        routes.forEach((r, i) => {
+            const color = colors[i % colors.length];
+
+            html += `
+                <button
+                    data-route-id="${r.Id}"
+                    onclick="window.selectRoute(${r.Id})"
+                    class="btn btn-sm btn-outline-secondary"
+                    style="border-left: 10px solid ${color}">
+                    Маршрут #${r.Id} / машина #${r.VehicleId ?? '-'}
+                </button>`;
+        });
+
+        html += `
+            <button onclick="window.showAllRoutes()" class="btn btn-sm btn-dark">
+                Все маршруты
+            </button>`;
+
+        legendContainer.innerHTML = html;
+    }
+
+    routes.forEach((r, i) => {
+        const color = colors[i % colors.length];
+        routeLayers.set(r.Id, buildRouteLayer(r, color));
+    });
+
+    window.selectRoute = showOnlyRoute;
+    window.showAllRoutes = showAllRoutes;
+
+    renderLegend();
+
+    if (routes.length > 0) {
+        showOnlyRoute(routes[0].Id);
+    } else {
+        map.setView([55.75, 37.61], 10);
+    }
+
+});
+</script>
+}

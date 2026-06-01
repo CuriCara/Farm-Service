@@ -1,7 +1,10 @@
+using BusinessLogic.GraphHopper.DistanceMatrix;
+using DataAccess.Entity.GrH;
+
 namespace Service.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
-using GA.DistanceMatrix;
+using Points_Data;
 
 [ApiController]
 [Route("api/test-matrix")]
@@ -14,19 +17,40 @@ public class TestMatrixController : ControllerBase
         _provider = provider;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Test()
+    [HttpGet("small_test")]
+    public async Task<IActionResult> TestSmall()
     {
         var points = new List<LocationPoint>
         {
-            new LocationPoint { Latitude = 55.7558, Longitude = 37.6176 }, // Msk
-            new LocationPoint { Latitude = 59.9343, Longitude = 30.3351 },  // Spb
-            new LocationPoint { Latitude = 55.7512, Longitude = 37.6184 }
+            new LocationPoint (55.7558,37.6176 ), // Msk
+            new LocationPoint (59.9343,30.3351 ),  // Spb
+            new LocationPoint (55.7512,37.6184 )
         };
-        points.Add(new LocationPoint{Latitude = 50.5436, Longitude = 43.4843});
+        points.Add(new LocationPoint (50.5436,43.4843));
 
         
         var result = await _provider.GetDistanceMatrixAsync(points);
-        return Ok(result);
+        return Ok(new {
+            Test = "small_test",
+            Count = points.Count,
+            result.Distances,
+            result.Times
+            });
+    }
+
+    [HttpGet("big_test")]
+    public async Task<IActionResult> BigTest()
+    {
+        var points = TestLocation.Points;
+
+        var result = await _provider.GetDistanceMatrixAsync(points);
+
+        return Ok(new
+        {
+            Test = "Large",
+            Count = points.Count,
+            result.Distances,
+            result.Times
+        });
     }
 }

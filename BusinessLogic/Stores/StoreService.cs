@@ -16,17 +16,6 @@ public class StoreService
 
     public StoreService(FarmDbContext db) => _db = db;
 
-    public async Task CleanDeliveryListAsync(int deliveryPlanId)
-    {
-        var deliveryItems = await _db.DeliveryItems
-            .Where(di => di.DeliveryPlanId == deliveryPlanId)
-            .ToListAsync();
-
-        _db.DeliveryItems.RemoveRange(deliveryItems);
-        
-        await _db.SaveChangesAsync();
-    }
-
     public async Task RandomPlanGenerateAsync(int storeId, DateOnly date)
     {
         var products = await _db.Products.Include(p => p.Category)

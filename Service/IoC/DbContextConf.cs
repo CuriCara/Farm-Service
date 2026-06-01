@@ -7,32 +7,34 @@ using DataAccess;
 
 public class DbContextConf
 {
-    
     public static void ConfigureService(WebApplicationBuilder builder)
     {
-        var config = new ConfigurationBuilder()
-            .AddJsonFile("D:\\RiderLab\\Farm\\Service\\appsettings.json", optional: false)
-            .Build();
-        string connectString = config.GetValue<string>("FarmDbContext");
-        
+        var connectString = builder.Configuration.GetConnectionString("FarmDbContext");
+
         if (string.IsNullOrEmpty(connectString))
         {
             throw new InvalidOperationException("Connection string 'FarmDbContext' not found.");
         }
-        
-        builder.Services.AddDbContextFactory<FarmDbContext>(options => { options.UseNpgsql(connectString); },
-            ServiceLifetime.Scoped
-        );
+
+        builder.Services.AddDbContextFactory<FarmDbContext>(options =>
+        {
+            options.UseNpgsql(connectString);
+        });
     }
 
-    public static void ConfigureApplication(IApplicationBuilder app)
+    public static async Task ConfigureApplicationAsync(IApplicationBuilder app)
     {
+        
         using var scope = app.ApplicationServices.CreateScope();
         var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<FarmDbContext>>();
         using var context = contextFactory.CreateDbContext();
-        context.Database.Migrate();
+        // Лучше делать миграции асинхронно
+        await context.Database.MigrateAsync();
+        var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
         
-        FarmDbInitializer.Seed(context);
-        FarmDbInitializer.CreateEntity(context);
+        var osmConn = config.GetConnectionString("OsmConnection");
+        
+        await FarmDbInitializer.Seed(context);
+        await FarmDbInitializer.CreateEntityAsync(context, osmConn);
     }   
 }

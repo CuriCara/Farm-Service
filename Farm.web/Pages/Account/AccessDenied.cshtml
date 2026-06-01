@@ -7,4 +7,4 @@
 <h1 class="text-danger">Нет прав доступа</h1>
 <p>У вас нет необходимых прав для выполнения этого действия.</p>
 <a asp-page="/Index" class="btn btn-primary">На главную</a>
-<button type="button" onclick="history.back()" class="btn btn-secondary">Назад</button>
+<a href="@Request.Headers["Referer"]" class="btn btn-secondary">Назад</a>

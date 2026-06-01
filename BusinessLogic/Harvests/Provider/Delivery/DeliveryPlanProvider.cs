@@ -47,8 +47,15 @@ public class DeliveryPlanProvider
             .ThenInclude(i => i.Product)
             .Include(dp => dp.Store)
             .ToListAsync();
-    
 
+    public async Task<DeliveryPlan?> GetByIdWithItemsAsync(int planId) =>
+        await _db.DeliveryPlans
+            .Include(dp => dp.Store)
+            .Include(dp => dp.Items)
+            .ThenInclude(i => i.Product)
+            .ThenInclude(p => p.Category)
+            .ThenInclude(c => c.BaseUnit)
+            .FirstOrDefaultAsync(dp => dp.Id == planId);
     public async Task CreateRandomByStoreAsync(int storeId)
     {
         await _storeService.RandomPlanGenerateAsync(storeId, DateOnly.FromDateTime(DateTime.MaxValue));
@@ -58,24 +65,90 @@ public class DeliveryPlanProvider
     {
         await _storeService.RandomPlanGenerateAsync(storeId, date);
         var plan = await GetByStoreAndDateAsync(storeId, date);
-        await _storeDemand.UpdateFromDeliveryPlanAsync(plan);
+        if (plan != null)
+            await _storeDemand.UpdateFromDeliveryPlanAsync(plan);
     }
     
     public async Task AddAsync(DeliveryPlan entity)
     {
         await _db.DeliveryPlans.AddAsync(entity);
         await _db.SaveChangesAsync();
+        await _storeDemand.UpdateFromDeliveryPlanAsync(entity);
+    }
+
+    public async Task AddItemToPlanAsync(int planId, int productId, double quantity)
+    {
+        var plan = await _db.DeliveryPlans
+            .Include(p => p.Items)
+            .FirstOrDefaultAsync(p => p.Id == planId);
+
+        if (plan == null)
+            throw new InvalidOperationException("Такой план не найден");
+
+        if (plan.Items?.Any(i => i.Id == productId) == true)
+            throw new InvalidOperationException("Такой товар уже добавлен");
+
+        var product = await _db.Products.FindAsync(productId);
+        if (product == null)
+            throw new InvalidOperationException("Такого товара не существует");
+
+        var newDeliveryItem = new DeliveryItem
+        {
+            ProductId = productId,
+            DeliveryPlanId = planId,
+            Quantity = quantity
+        };
+
+        await _db.DeliveryItems.AddAsync(newDeliveryItem);
+        await _db.SaveChangesAsync();
+
+        var newPlan = newDeliveryItem.DeliveryPlan;
+        
+        await _storeDemand.UpdateFromDeliveryPlanAsync(newPlan);
     }
 
     public async Task UpdateAsync(DeliveryPlan entity)
     {
         _db.DeliveryPlans.Update(entity);
         await _db.SaveChangesAsync();
+        await _storeDemand.UpdateFromDeliveryPlanAsync(entity);
     }
 
+    public async Task UpdateWithNewQuantityAsync(int itemId, int quantity)
+    {
+        var item = await _db.DeliveryItems
+            .FirstOrDefaultAsync(i => i.Id == itemId);
+
+        if (item == null)
+            throw new InvalidOperationException("Товара нету в списке плана");
+
+        item.Quantity = quantity;
+        await _db.SaveChangesAsync();
+
+        var plan = item.DeliveryPlan;
+
+        await _storeDemand.UpdateFromDeliveryPlanAsync(plan);
+    }
     public async Task DeleteAsync(DeliveryPlan entity)
     {
         _db.DeliveryPlans.Remove(entity);
         await _db.SaveChangesAsync();
+        await _storeDemand.UpdateFromDeliveryPlanAsync(entity);
+    }
+
+    public async Task RemoveItemFromPlanAsync(int itemId)
+    {
+        var item = await _db.DeliveryItems
+            .FindAsync(itemId);
+
+        if (item == null)
+            throw new InvalidOperationException("Товар не найден в плане");
+
+        var plan = item.DeliveryPlan;
+        
+        _db.DeliveryItems.Remove(item);
+        await _db.SaveChangesAsync();
+
+        await _storeDemand.UpdateFromDeliveryPlanAsync(plan);
     }
 }

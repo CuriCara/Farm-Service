@@ -1,4 +1,5 @@
 ﻿using DataAccess.Entity;
+using DataAccess.Entity.Logistics.GA.Runs;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,6 +26,10 @@ public class FarmDbContext : IdentityDbContext<User, Role, int>
     public DbSet<RoutePlan> RoutePlans { get; set; }
     public DbSet<Route> Routes { get; set; }
     public DbSet<RouteStop> RouteStops { get; set; }
+    
+    public DbSet<OptimizationRun> OptimizationRuns { get; set; }
+    public DbSet<FitnessHistoryPoint> FitnessHistoryPoints { get; set; }
+    public DbSet<OptimizationRoute> OptimizationRoutes { get; set; }
 
     public FarmDbContext(DbContextOptions<FarmDbContext> options) : base(options) { }
 
@@ -134,32 +139,93 @@ public class FarmDbContext : IdentityDbContext<User, Role, int>
             .HasIndex(sd => new { sd.StoreId, sd.ProductId, sd.Date })
             .IsUnique();
 
+        
+        // Связи для путей оптимизации 
         modelBuilder.Entity<RoutePlan>()
             .HasMany(rp => rp.Routes)
             .WithOne(r => r.RoutePlan)
             .HasForeignKey(r => r.RoutePlanId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<RouteStop>()
+            .HasOne(rs => rs.Farm)
+            .WithMany(f => f.RouteStops)
+            .HasForeignKey(rs => rs.FarmId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<RouteStop>()
+            .HasOne(rs => rs.Store)
+            .WithMany(s => s.RouteStops)
+            .HasForeignKey(rs => rs.StoreId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<RouteStop>()
+            .HasOne(rs => rs.Route)
+            .WithMany(r => r.Stops)
+            .HasForeignKey(rs => rs.RouteId);
+        
+        modelBuilder.Entity<RouteStop>()
+            .HasCheckConstraint("CK_RouteStop_Location",
+                "((\"LocationType\" = 0 AND \"FarmId\" IS NOT NULL AND \"StoreId\" IS NULL) OR " +
+                "(\"LocationType\" = 1 AND \"StoreId\" IS NOT NULL AND \"FarmId\" IS NULL) OR " +
+                "(\"LocationType\" = 2 AND \"FarmId\" IS NOT NULL AND \"StoreId\" IS NULL))");
 
         modelBuilder.Entity<Route>()
             .HasOne(r => r.Vehicle)
             .WithMany()
             .HasForeignKey(r => r.VehicleId)
             .OnDelete(DeleteBehavior.SetNull);
-
+        
         modelBuilder.Entity<Route>()
-            .HasOne<Farm>()
+            .HasOne(r => r.Depot)
             .WithMany()
             .HasForeignKey(r => r.DepotId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_Route_Depot");
 
         modelBuilder.Entity<Route>()
             .HasMany(r => r.Stops)
             .WithOne(s => s.Route)
             .HasForeignKey(s => s.RouteId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        
+        // Настройки связей для оптизированных ранов 
+        modelBuilder.Entity<OptimizationRun>()
+            .HasMany(r => r.Routes)
+            .WithOne(r => r.Run)
+            .HasForeignKey(r => r.OptimizationRunId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<OptimizationRun>()
+            .HasMany(r => r.FitnessHistory)
+            .WithOne(f => f.Run)
+            .HasForeignKey(f => f.OptimizationRunId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<OptimizationRoute>()
+            .Property(r => r.DistanceKm)
+            .IsRequired();
 
-        modelBuilder.Entity<RouteStop>()
-            .HasIndex(rs => new { rs.RouteId, rs.StopIndex })
+        modelBuilder.Entity<OptimizationRoute>()
+            .Property(r => r.TimeHours)
+            .IsRequired();
+        
+        modelBuilder.Entity<FitnessHistoryPoint>()
+            .HasKey(f => f.Id);
+
+        modelBuilder.Entity<FitnessHistoryPoint>()
+            .HasIndex(f => new { f.OptimizationRunId, f.Generation })
             .IsUnique();
+        
+        modelBuilder.Entity<OptimizationRun>()
+            .HasIndex(r => r.PlanningDate);
+
+        modelBuilder.Entity<OptimizationRun>()
+            .HasIndex(r => r.BestFitness);
+        
+        modelBuilder.Entity<OptimizationRun>()
+            .Property(r => r.FitnessObjective)
+            .HasConversion<string>();
     }
 }

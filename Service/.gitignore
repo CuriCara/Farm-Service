@@ -1,4 +1,19 @@
-﻿**/bin
+﻿# Секреты и локальные настройки
+appsettings*.local.json
+appsettings.Production.json
+secrets.json
+*.usersecrets
+
+# Логи, БД, артефакты
+Logs/
+*.log
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+bin/
+obj/
+
+**/bin
 **/obj
 **/.idea
 **/.vs

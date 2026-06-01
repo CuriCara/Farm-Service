@@ -1,5 +1,6 @@
 using BusinessLogic.Authorization;
 using BusinessLogic.EmailSend;
+using BusinessLogic.GraphHopper.DistanceMatrix;
 using BusinessLogic.Harvests.Manager;
 using BusinessLogic.Harvests.Provider;
 using BusinessLogic.RoleInit;
@@ -11,33 +12,24 @@ using DinkToPdf.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Service;
-using Service.GA.DistanceMatrix;
 using Service.IoC;
 using Service.Settings;
 
-var configuration = new ConfigurationBuilder()
-    .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json")
-    .Build();
-
-var settings = FarmSettingsReader.Read(configuration);
-
 var builder = WebApplication.CreateBuilder(args);
+
+var configuration = builder.Configuration;
+var settings = FarmSettingsReader.Read(configuration);
 
 builder.Services.AddAutoMapper(typeof(HarvestProfile));
 builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 builder.Services.AddControllers();
+builder.Configuration.AddUserSecrets<Program>();
 builder.Services.AddHostedService<ReportBackgroundService>();
-builder.Services.AddDbContext<FarmDbContext>(options =>
-    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
-builder.Services.AddHttpClient<IDistanceMatrixProvider, GraphHopperDistanceMatrixProvider>();
-builder.Services.Configure<GraphHopperSettings>(
-    builder.Configuration.GetSection("GraphHopper"));
-
+builder.Services.AddHttpClient<IDistanceMatrixProvider, GraphHopperElementWiseMatrixProvider>();
 AuthorizationConf.ConfigureServices(builder.Services, settings);
 DbContextConf.ConfigureService(builder);
 SerilogConf.ConfigureService(builder);
@@ -50,7 +42,7 @@ var app = builder.Build();
 
 SerilogConf.ConfigureApplication(app);
 SwaggerConf.ConfigureApplication(app);
-DbContextConf.ConfigureApplication(app);
+await DbContextConf.ConfigureApplicationAsync(app);
 AuthorizationConf.ConfigureApplication(app);
 
 using (var scope = app.Services.CreateScope())
